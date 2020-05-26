@@ -13,110 +13,6 @@
 #endif
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
-#define TEST
-#ifdef TEST
-#include "BTNode.h"
-#include "recfile.h"
-#include "recordng.h"
-#include "BTree.h"
-
-// 외부 기호 참조 오류 정정용
-#include "BTNode.cpp"
-#include "BTree.cpp"
-#include "SimpInd.cpp"
-
-#include <iostream>
-#include <string>
-#include <cstdlib>
-#define NumberOfRecords 10
-using namespace std;
-const int BTreeSize = 5;//btree order m = 5
-
-template<class KeyType, class RecType>
-static int RetrieveRecording(Recording& recording, string key, BTree<KeyType>& RecordingIndex, RecordFile<RecType>& RecordingFile)
-{
-	int result;
-	result = RecordingIndex.Search(key);
-	if (result == -1) {
-		cout << "Index를 찾을 수 없습니다." << endl;
-		return FALSE;
-	}
-	result = RecordingFile.Read(recording, result);
-	if (result == -1) {
-		cout << "File을 읽을 수 없습니다." << endl;
-		return FALSE;
-	}
-	result = recording.Unpack(RecordingFile.GetBuffer());
-	return result;
-}
-
-int run()
-{
-	int result, i;
-	int choice;
-	string searchKey;
-	Recording record;
-	FixedFieldBuffer Buffer(300, 100);
-	RecordFile<Recording> Recfile(Buffer);
-	Recfile.Create("recording.dat", ios::out | ios::trunc);
-	BTree <string> bt(BTreeSize);
-	char fileName[] = "btindex.dat";
-	result = bt.Create(fileName, ios::in | ios::out | ios::trunc);
-	if (!result) { cout << "Creating of BTree index fails" << endl; return 0; }
-	do
-	{
-		cout << "1.Insert all records" << endl;//동작해야 함
-		cout << "2.Delete a record" << endl;//동작해야 함
-		cout << "3.Search with a key" << endl;//동작해야 함
-		cout << "4.Display all record" << endl;//in-order traversal //동작해야 함
-		cout << "5.Exit" << endl;
-		cout << "Enter your choice : ";
-		cin >> choice;
-		switch (choice)
-		{
-		case 1:
-			int recaddr;
-			Recording* R[NumberOfRecords];
-			R[0] = new Recording("LON", "1", "Romeo and Juliet", "Prokofiev", "Maazel");
-			R[1] = new Recording("RCA", "2", "Quartet in C Sharp Minor", "Beethoven", "Julliard");
-			R[2] = new Recording("WAR", "3", "Touchstone", "Corea", "Corea");
-			R[3] = new Recording("ANG", "4", "Symphony No. 9", "Beethoven", "Giulini");
-			R[4] = new Recording("COL", "5", "Nebraska", "Springsteen", "Springsteen");
-			R[5] = new Recording("DG", "6", "Symphony No. 9", "Beethoven", "Karajan");
-			R[6] = new Recording("MER", "7", "Coq d'or Suite", "Rimsky-Korsakov", "Leinsdorf");
-			R[7] = new Recording("COL", "8", "Symphony No. 9", "Dvorak", "Bernstein");
-			R[8] = new Recording("DG", "9", "Violin Concerto", "Beethoven", "Ferras");
-			R[9] = new Recording("FF", "10", "Good News", "Sweet Honey in the Rock", "Sweet Honey in the Rock");
-			for (int i = 0; i < NumberOfRecords; i++)
-			{
-				R[i]->Init(Buffer);
-				R[i]->Pack(Buffer);
-				recaddr = Recfile.Write(*R[i]);
-				cout << "Recordin2 R[" << i << "] at recaddr " << recaddr << endl;
-				result = bt.Insert(R[i]->IdNum, recaddr);
-			}
-			break;
-		case 2:
-			//cout << bt.Delete("COL") << endl;
-			break;
-		case 3:
-			cout << "Search key = " << endl;
-			cin >> searchKey;
-			if (RetrieveRecording(record, searchKey, bt, Recfile) == TRUE)
-				cout << record << endl;//operator <<을 구현해야 한다
-			break;
-		case 4:
-			cout << bt;//operator <<을 friend function으로 구현한다
-			//bt의 모든 key value을 출력해야 한다.
-			break;
-		default:
-			cout << "Wrong choice\n";
-		}
-	} while (choice < 5);
-	system("pause");
-	return 1;
-}
-#endif
 
 class CAboutDlg : public CDialogEx
 {
@@ -159,19 +55,31 @@ CSearchAppDlg::CSearchAppDlg(CWnd* pParent /*=nullptr*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
+CSearchAppDlg::~CSearchAppDlg()
+{
+	delete m_buffer;
+	delete m_recFile;
+}
+
 void CSearchAppDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_ID_EDIT, m_idEdit);
+	DDX_Control(pDX, IDC_LABEL_EDIT, m_labelEdit);
+	DDX_Control(pDX, IDC_TITLE_EDIT, m_titleEdit);
+	DDX_Control(pDX, IDC_COMPOSER_EDIT, m_composerEdit);
+	DDX_Control(pDX, IDC_ARTIST_EDIT, m_artistEdit);
+	DDX_Control(pDX, IDC_FIND_ID_EDIT, m_findIdEdit);
+	DDX_Control(pDX, IDC_ITEM_LIST, m_itemList);
 }
 
 BEGIN_MESSAGE_MAP(CSearchAppDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_INSERT_BUTTON, &CSearchAppDlg::OnBnClickedInsertButton)
-	ON_BN_CLICKED(IDC_INSERT_BUTTON2, &CSearchAppDlg::OnBnClickedInsertButton2)
-	ON_CBN_SELCHANGE(IDC_OUTPUT_COMBO, &CSearchAppDlg::OnCbnSelchangeOutputCombo)
 	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_INSERT_BUTTON, &CSearchAppDlg::OnBnClickedInsertButton)
+	ON_BN_CLICKED(IDC_FIND_BUTTON, &CSearchAppDlg::OnBnClickedFindButton)
 END_MESSAGE_MAP()
 
 
@@ -210,7 +118,14 @@ BOOL CSearchAppDlg::OnInitDialog()
 #ifdef TEST
 	run();
 #endif
-	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
+
+	m_buffer = new FixedFieldBuffer(300, 100);
+	m_recFile = new RecordFile<Recording>(*m_buffer);
+	m_recFile->Create("recording.dat", ios::out | ios::trunc);
+	m_btree = new BTree<string>(BTreeSize);
+	BOOL result = m_btree->Create("btindex.dat", ios::in | ios::out | ios::trunc);
+
+	return result;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
 void CSearchAppDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -266,6 +181,7 @@ BOOL CSearchAppDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// enter
 	if ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_RETURN)) {
+		OnBnClickedInsertButton();
 		return TRUE;
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
@@ -279,5 +195,98 @@ void CSearchAppDlg::OnSize(UINT nType, int cx, int cy)
 	if (!pCtrl) {
 		return;
 	}
-	DrawScreen();
+}
+
+
+void CSearchAppDlg::OnBnClickedInsertButton()
+{
+	CString id, label, title, composer, artist;
+	m_idEdit.GetWindowTextW(id);
+	m_labelEdit.GetWindowTextW(label);
+	m_titleEdit.GetWindowTextW(title);
+	m_composerEdit.GetWindowTextW(composer);
+	m_artistEdit.GetWindowTextW(artist);
+
+	const bool hasEmpty = id.IsEmpty() || label.IsEmpty() || title.IsEmpty() || composer.IsEmpty() || artist.IsEmpty();
+
+	if (hasEmpty) {
+		AfxMessageBox(_T("모든 항목을 다 채워주시길 바랍니다."));
+		return;
+	}
+
+	Recording* R = new Recording((CStringA)label, (CStringA)id, (CStringA)title, (CStringA)composer, (CStringA)artist);
+	if (R == nullptr) {
+		AfxMessageBox(_T("메모리가 부족합니다."));
+		return;
+	}
+
+	int recAddr = -1, ret = -1;
+
+	R->Init(*m_buffer);
+	R->Pack(*m_buffer);
+	recAddr = m_recFile->Write(*R);
+	if (recAddr == -1) {
+		AfxMessageBox(_T("File 쓰기에 실패했습니다."));
+		return;
+	}
+
+	ret = m_btree->Insert(R->IdNum, recAddr);
+	if (ret != 1) {
+		AfxMessageBox(_T("BTree에 Insert하는 데 실패했습니다."));
+		return;
+	}
+
+	stringstream textStream;
+	string token;
+
+	textStream << *m_btree;
+
+	m_itemList.ResetContent();
+	while (std::getline(textStream, token)) {
+		CString str(token.c_str());
+		m_itemList.AddString(str);
+	}
+	m_idEdit.SetWindowTextW(_T(""));
+	m_labelEdit.SetWindowTextW(_T(""));
+	m_titleEdit.SetWindowTextW(_T(""));
+	m_composerEdit.SetWindowTextW(_T(""));
+	m_artistEdit.SetWindowTextW(_T(""));
+}
+
+
+void CSearchAppDlg::OnBnClickedFindButton()
+{
+	CString cstr;
+	m_findIdEdit.GetWindowTextW(cstr);
+	string str((CStringA)cstr);
+	if (RetrieveRecording(m_record, str, *m_btree, *m_recFile) == TRUE) {
+		stringstream result;
+		result << m_record;
+		CString output(result.str().c_str()), label, title, composer, artist;
+		AfxExtractSubString(label, output, 0, '|');
+		AfxExtractSubString(title, output, 2, '|');
+		AfxExtractSubString(composer, output, 3, '|');
+		AfxExtractSubString(artist, output, 4, '|');
+		output.Format(_T("라벨: %s\n제목: %s\n작곡가: %s\n아티스트: %s"), label, title, composer, artist);
+		MessageBox(output, _T("조회 결과"));
+	}
+	m_findIdEdit.SetWindowTextW(_T(""));
+}
+
+template<class KeyType, class RecType>
+int CSearchAppDlg::RetrieveRecording(Recording& recording, string key, BTree<KeyType>& RecordingIndex, RecordFile<RecType>& RecordingFile)
+{
+	int result;
+	result = RecordingIndex.Search(key);
+	if (result == -1) {
+		AfxMessageBox(_T("Index를 찾을 수 없습니다."));
+		return FALSE;
+	}
+	result = RecordingFile.Read(recording, result);
+	if (result == -1) {
+		AfxMessageBox(_T("File을 읽는 데 실패했습니다."));
+		return FALSE;
+	}
+	result = recording.Unpack(RecordingFile.GetBuffer());
+	return result;
 }

@@ -73,7 +73,7 @@ void SimpleIndex<keyType>::Print(ostream& stream) const
 	stream << "Simple Index max keys " << MaxKeys
 		<< " num keys " << NumKeys << endl;
 	for (int i = 0; i < NumKeys; i++)
-		stream << "\tKey[" << i << "] " << Keys[i]
+		stream << "    Key[" << i << "] " << Keys[i]
 		<< " RecAddr " << RecAddrs[i] << endl;
 }
 

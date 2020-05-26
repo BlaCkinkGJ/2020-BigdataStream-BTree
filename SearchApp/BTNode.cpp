@@ -41,7 +41,7 @@ int BTreeNode<keyType>::Remove(const keyType key, int recAddr)
 template <class keyType>
 void BTreeNode<keyType>::Print(ostream& stream) const
 {
-	SimpleIndex<keyType>::Print(cout);
+	SimpleIndex<keyType>::Print(stream);
 }
 
 template <class keyType>
