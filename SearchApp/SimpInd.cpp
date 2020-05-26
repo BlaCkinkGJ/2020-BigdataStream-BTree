@@ -83,8 +83,8 @@ int SimpleIndex<keyType>::Find(const keyType key,
 {
 	for (int i = 0; i < NumKeys; i++)
 	{
-		if (Keys[i] < key) continue; // not found yet
-		if (Keys[i] == key) // exact match
+		if (atoi(Keys[i].c_str()) < atoi(key.c_str())) continue; // not found yet
+		if (atoi(Keys[i].c_str()) == atoi(key.c_str())) // exact match
 		{
 			if (recAddr < 0) return i;
 			else if (recAddr == RecAddrs[i]) return i;

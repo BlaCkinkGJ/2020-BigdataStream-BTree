@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "recordng.h"
 #include <strstream>
-#include <string.h>
+#include <cstring>
 
 Recording::Recording()
 {

@@ -186,7 +186,6 @@
     <ClInclude Include="BTNode.h" />
     <ClInclude Include="BTree.h" />
     <ClInclude Include="buffile.h" />
-    <ClInclude Include="Element.h" />
     <ClInclude Include="fixfld.h" />
     <ClInclude Include="fixlen.h" />
     <ClInclude Include="framework.h" />

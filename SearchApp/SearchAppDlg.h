@@ -41,14 +41,9 @@ protected:
 	void DrawScreen();
 	DECLARE_MESSAGE_MAP()
 public:
-	CEdit m_insertEdit;
 	afx_msg void OnBnClickedInsertButton();
-	CListBox m_listBox;
 	afx_msg void OnBnClickedInsertButton2();
-	CStatic m_pictureBox;
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	CComboBox m_operCombo;
-	CComboBox m_outCombo;
 	afx_msg void OnCbnSelchangeOutputCombo();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 };

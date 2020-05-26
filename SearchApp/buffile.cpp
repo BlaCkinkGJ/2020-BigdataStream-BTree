@@ -73,10 +73,13 @@ int BufferFile::Read(int recaddr)
 int BufferFile::Write(int recaddr)
 // write the current buffer contents
 {
+	int result = 0;
 	if (recaddr == -1)
-		return Buffer.Write(File);
+		result = Buffer.Write(File);
 	else
-		return Buffer.DWrite(File, recaddr);
+		result = Buffer.DWrite(File, recaddr);
+	File.sync();
+	return result;
 }
 
 int BufferFile::Append()

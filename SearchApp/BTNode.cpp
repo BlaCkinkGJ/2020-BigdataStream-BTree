@@ -48,8 +48,14 @@ template <class keyType>
 int BTreeNode<keyType>::LargestKey()
 // returns value of largest key
 {
-	if (this->NumKeys > 0) return atoi(this->Keys[this->NumKeys - 1].c_str());
-	else return atoi(this->Keys[0].c_str());
+	int value = 0;
+	if (this->NumKeys > 0) {
+		value = atoi(this->Keys[this->NumKeys - 1].c_str());
+	}
+	else {
+		value = atoi(this->Keys[0].c_str());
+	}
+	return value;
 }
 
 template <class keyType>

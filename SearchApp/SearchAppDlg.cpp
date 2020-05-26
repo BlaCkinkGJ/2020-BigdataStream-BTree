@@ -31,12 +31,21 @@
 #define NumberOfRecords 10
 using namespace std;
 const int BTreeSize = 5;//btree order m = 5
+
 template<class KeyType, class RecType>
-int RetrieveRecording(Recording& recording, string key, BTree<KeyType>& RecordingIndex, RecordFile<RecType>& RecordingFile)
+static int RetrieveRecording(Recording& recording, string key, BTree<KeyType>& RecordingIndex, RecordFile<RecType>& RecordingFile)
 {
 	int result;
-	result = RecordingFile.Read(recording, RecordingIndex.Search(key));
-	if (result == -1) return FALSE;
+	result = RecordingIndex.Search(key);
+	if (result == -1) {
+		cout << "Index를 찾을 수 없습니다." << endl;
+		return FALSE;
+	}
+	result = RecordingFile.Read(recording, result);
+	if (result == -1) {
+		cout << "File을 읽을 수 없습니다." << endl;
+		return FALSE;
+	}
 	result = recording.Unpack(RecordingFile.GetBuffer());
 	return result;
 }
@@ -68,24 +77,23 @@ int run()
 		case 1:
 			int recaddr;
 			Recording* R[NumberOfRecords];
-			R[0] = new Recording("LON", "2312", "Romeo and Juliet", "Prokofiev", "Maazel");
-			R[1] = new Recording("RCA", "2626", "Quartet in C Sharp Minor", "Beethoven", "Julliard");
-			R[2] = new Recording("WAR", "23699", "Touchstone", "Corea", "Corea");
-			R[3] = new Recording("ANG", "3795", "Symphony No. 9", "Beethoven", "Giulini");
-			R[4] = new Recording("COL", "38358", "Nebraska", "Springsteen", "Springsteen");
-			R[5] = new Recording("DG", "18807", "Symphony No. 9", "Beethoven", "Karajan");
-			R[6] = new Recording("MER", "75016", "Coq d'or Suite", "Rimsky-Korsakov", "Leinsdorf");
-			R[7] = new Recording("COL", "31809", "Symphony No. 9", "Dvorak", "Bernstein");
-			R[8] = new Recording("DG", "139201", "Violin Concerto", "Beethoven", "Ferras");
-			R[9] = new Recording("FF", "245", "Good News", "Sweet Honey in the Rock", "Sweet Honey in the Rock");
+			R[0] = new Recording("LON", "1", "Romeo and Juliet", "Prokofiev", "Maazel");
+			R[1] = new Recording("RCA", "2", "Quartet in C Sharp Minor", "Beethoven", "Julliard");
+			R[2] = new Recording("WAR", "3", "Touchstone", "Corea", "Corea");
+			R[3] = new Recording("ANG", "4", "Symphony No. 9", "Beethoven", "Giulini");
+			R[4] = new Recording("COL", "5", "Nebraska", "Springsteen", "Springsteen");
+			R[5] = new Recording("DG", "6", "Symphony No. 9", "Beethoven", "Karajan");
+			R[6] = new Recording("MER", "7", "Coq d'or Suite", "Rimsky-Korsakov", "Leinsdorf");
+			R[7] = new Recording("COL", "8", "Symphony No. 9", "Dvorak", "Bernstein");
+			R[8] = new Recording("DG", "9", "Violin Concerto", "Beethoven", "Ferras");
+			R[9] = new Recording("FF", "10", "Good News", "Sweet Honey in the Rock", "Sweet Honey in the Rock");
 			for (int i = 0; i < NumberOfRecords; i++)
 			{
 				R[i]->Init(Buffer);
 				R[i]->Pack(Buffer);
 				recaddr = Recfile.Write(*R[i]);
 				cout << "Recordin2 R[" << i << "] at recaddr " << recaddr << endl;
-				string value = R[i]->IdNum;
-				result = bt.Insert(value, recaddr);
+				result = bt.Insert(R[i]->IdNum, recaddr);
 			}
 			break;
 		case 2:
@@ -94,8 +102,8 @@ int run()
 		case 3:
 			cout << "Search key = " << endl;
 			cin >> searchKey;
-			RetrieveRecording(record, searchKey, bt, Recfile);
-			cout << record << endl;//operator <<을 구현해야 한다
+			if (RetrieveRecording(record, searchKey, bt, Recfile) == TRUE)
+				cout << record << endl;//operator <<을 구현해야 한다
 			break;
 		case 4:
 			cout << bt;//operator <<을 friend function으로 구현한다
@@ -154,11 +162,6 @@ CSearchAppDlg::CSearchAppDlg(CWnd* pParent /*=nullptr*/)
 void CSearchAppDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_INSERT_EDIT, m_insertEdit);
-	DDX_Control(pDX, IDC_LIST3, m_listBox);
-	DDX_Control(pDX, IDC_PICTURE_BOX, m_pictureBox);
-	DDX_Control(pDX, IDC_OPERATION_COMBO, m_operCombo);
-	DDX_Control(pDX, IDC_OUTPUT_COMBO, m_outCombo);
 }
 
 BEGIN_MESSAGE_MAP(CSearchAppDlg, CDialogEx)
@@ -207,14 +210,6 @@ BOOL CSearchAppDlg::OnInitDialog()
 #ifdef TEST
 	run();
 #endif
-	m_operCombo.AddString(_T("입력")); // INSERT_DATA 0
-	m_operCombo.AddString(_T("삭제")); // DELETE_DATA 1
-	m_operCombo.SetCurSel(0);
-
-	m_outCombo.AddString(_T("중위 탐색")); // IN_ORDER 0 
-	m_outCombo.AddString(_T("전위 탐색")); // PRE_ORDER 1
-	m_outCombo.SetCurSel(0);
-
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -267,164 +262,13 @@ HCURSOR CSearchAppDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void CSearchAppDlg::DrawScreen()
-{
-#if 0
-	keys.clear();
-	tree.getTreePoints(keys, m_order);
-
-	CRect rect;
-	m_pictureBox.GetClientRect(&rect);
-	CDC* pDC = m_pictureBox.GetWindowDC();
-	pDC->SetWindowExt(100, 100);
-	pDC->SetWindowExt(rect.Width(), rect.Height());
-	pDC->FillSolidRect(&rect, RGB(255, 255, 255));
-	for (const auto& _key : keys) {
-		CString temp;
-		int key = _key.first;
-		int x = _key.second.second;
-		int y = _key.second.first;
-		const int xlen = 40;
-		const int ylen = 30;
-		const int xsize = xlen;
-		const int ysize = ylen - 10;
-
-		x = xlen * x;
-		y = ylen * y;
-
-		CRect bound(x - 1, y - 1, x + xsize + 1, y + ysize + 1);
-		CRect textLocation(x, y, x + xlen, y + ylen);
-		AvlNode<int>* _node = tree.search(key);
-		int _leftKey = -1, _rightKey = -1;
-
-		temp.Format(_T("%d"), key);
-
-		if (_node == nullptr) {
-			continue;
-		}
-
-		if (_node->getLeftChild())
-			_leftKey = _node->getLeftChild()->getKey();
-		if (_node->getRightChild())
-			_rightKey = _node->getRightChild()->getKey();
-
-		pDC->Rectangle(&bound);
-		pDC->DrawText(temp, &textLocation, DT_CENTER);
-
-		if (_leftKey != -1) {
-			int _key = _leftKey;
-			int fromX = x;
-			int fromY = y + ysize + 1;
-			int toX = xlen * keys.find(_key)->second.second + (xsize + 1) - 1;
-			int toY = ylen * keys.find(_key)->second.first - 1;
-			const int len = 3;
-			pDC->MoveTo(fromX, fromY);
-			pDC->Ellipse(fromX - len, fromY - len, fromX + len, fromY + len);
-			pDC->LineTo(toX, toY);
-			pDC->Ellipse(toX - len, toY - len, toX + len, toY + len);
-			// cout << fromX << ", " << fromY << " ==> " << toX << ", " << toY << endl;
-		}
-		if (_rightKey != -1) {
-			int _key = _rightKey;
-			int fromX = x + xsize + 1;
-			int fromY = y + ysize + 1;
-			int toX = xlen * keys.find(_key)->second.second - 1;
-			int toY = ylen * keys.find(_key)->second.first - 1;
-			const int len = 3;
-			pDC->MoveTo(fromX, fromY);
-			pDC->Ellipse(fromX - len, fromY - len, fromX + len, fromY + len);
-			pDC->LineTo(toX, toY);
-			pDC->Ellipse(toX - len, toY - len, toX + len, toY + len);
-			// cout << fromX << ", " << fromY << " ==> " << toX << ", " << toY << endl;
-		}
-		UpdateWindow();
-	}
-	m_pictureBox.ReleaseDC(pDC);
-	UpdateWindow();
-#endif
-}
-
-
-
-void CSearchAppDlg::OnBnClickedInsertButton()
-{
-#if 0
-	CString strData;
-	int key;
-
-	m_insertEdit.GetWindowTextW(strData);
-	if (strData.IsEmpty()) {
-		return;
-	}
-
-	key = _ttoi(strData);
-
-	if (m_operCombo.GetCurSel() == CSearchAppDlg::INSERT_DATA) {
-		tree.Insert(key);
-	}
-	else if (m_operCombo.GetCurSel() == CSearchAppDlg::DELETE_DATA) {
-		tree.Delete(key);
-	}
-
-	m_listBox.ResetContent();
-	tree.inOrder();
-	strData.Format(_T("inOrder ==> %s"), CString(tree.resultStream.str().c_str()));
-	m_listBox.AddString(strData);
-	tree.preOrder();
-	strData.Format(_T("preOrder ==> %s"), CString(tree.resultStream.str().c_str()));
-	m_listBox.AddString(strData);
-
-	DrawScreen();
-
-	m_insertEdit.SetWindowTextW(_T(""));
-#endif
-}
-
-// TODO: display도 구현할 것!
-
-
-void CSearchAppDlg::OnBnClickedInsertButton2()
-{
-#if 0
-	vector<CString> v;
-	int i = 0;
-	tree.display(v);
-	m_listBox.ResetContent();
-	for (const auto& value : v) {
-		m_listBox.InsertString(i, value);
-		i++;
-	}
-#endif
-}
-
-
 BOOL CSearchAppDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// enter
 	if ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_RETURN)) {
-		OnBnClickedInsertButton();
 		return TRUE;
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
-}
-
-
-void CSearchAppDlg::OnCbnSelchangeOutputCombo()
-{
-#if 0
-	int outputMethod = m_outCombo.GetCurSel();
-	switch (outputMethod) {
-	case CSearchAppDlg::IN_ORDER:
-		m_order = Order::IN_ORDER;
-		break;
-	case CSearchAppDlg::PRE_ORDER:
-		m_order = Order::PRE_ORDER;
-		break;
-	default:
-		m_order = Order::IN_ORDER;
-	}
-	DrawScreen();
-#endif
 }
 
 

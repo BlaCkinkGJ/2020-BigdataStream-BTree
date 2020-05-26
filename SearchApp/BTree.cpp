@@ -67,30 +67,31 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 // 여기서 역순으로 하고 싶다면 Lagest키와 operator만 변경해주면 됩니다.
 {
 	int result; int level = Height - 1;
-	int newLargest = 0; keyType prevKey, largestKey;
+	bool newLargest = false; keyType prevKey, largestKey;
 	BTNode* thisNode = 0, * newNode = 0, * parentNode = 0;
 	thisNode = FindLeaf(key);
 
 	// test for special case of new largest key in tree
 	if (atoi(key.c_str()) > thisNode->LargestKey())
 	{
-		newLargest = 1; prevKey = thisNode->LargestKey();
+		newLargest = true; prevKey = to_string(thisNode->LargestKey());
 	}
 
 	result = thisNode->Insert(key, recAddr);
 
 	// handle special case of new largest key in tree
-	if (newLargest)
+	if (newLargest == true) {
 		for (int i = 0; i < Height - 1; i++)
 		{
 			Nodes[i]->UpdateKey(prevKey, key);
 			if (i > 0) Store(Nodes[i]);
 		}
+	}
 
 	while (result == -1) // if overflow and not root
 	{
 		//remember the largest key
-		largestKey = thisNode->LargestKey();
+		largestKey = to_string(thisNode->LargestKey());
 		// split the node
 		newNode = NewNode();
 		thisNode->Split(newNode);
@@ -99,20 +100,20 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 		if (level < 0) break;
 		// insert newNode into parent of thisNode
 		parentNode = Nodes[level];
-		result = parentNode->UpdateKey
-		(largestKey, to_string(thisNode->LargestKey()));
-		result = parentNode->Insert
-		(to_string(newNode->LargestKey()), newNode->RecAddr);
+		result = parentNode->UpdateKey(largestKey, to_string(thisNode->LargestKey()));
+		result = parentNode->Insert(to_string(newNode->LargestKey()), newNode->RecAddr);
 		thisNode = parentNode;
 	}
 	Store(thisNode);
-	if (level >= 0) return 1;// insert complete
-							 // else we just split the root
+	if (level >= 0) { // insert complete
+		return 1;
+	}
+	// else we just split the root
 	int newAddr = BTreeFile.Append(Root); // put previous root into file
 										  // insert 2 keys in new root node
-	Root.Keys[0] = thisNode->LargestKey();
+	Root.Keys[0] = to_string(thisNode->LargestKey());
 	Root.RecAddrs[0] = newAddr;
-	Root.Keys[1] = newNode->LargestKey();
+	Root.Keys[1] = to_string(newNode->LargestKey());
 	Root.RecAddrs[1] = newNode->RecAddr;
 	Root.NumKeys = 2;
 	Height++;

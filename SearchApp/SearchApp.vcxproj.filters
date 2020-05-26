@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\btree">
-      <UniqueIdentifier>{6884215a-7635-4ae2-a287-06892e05db82}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SearchApp.h">
@@ -34,9 +31,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Element.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="BTNode.h">
@@ -89,41 +83,41 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="BTree.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="buffile.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="fixfld.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="fixlen.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="IndBuff.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="IndNode.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="iobuffer.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="length.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="recordng.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpInd.cpp">
-      <Filter>소스 파일\btree</Filter>
-    </ClCompile>
     <ClCompile Include="varlen.cpp">
-      <Filter>소스 파일\btree</Filter>
+      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="BTNode.cpp">
-      <Filter>소스 파일\btree</Filter>
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BTree.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="buffile.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="fixfld.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="fixlen.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="IndBuff.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="IndNode.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="iobuffer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="length.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="recordng.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpInd.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
